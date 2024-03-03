@@ -1,3 +1,4 @@
+import NewFieldModal from "@/components/NewFieldModal";
 import FormRenameModal from "@/components/modals/FormRenameModal";
 import NewFormModal from "@/components/modals/NewFormModal";
 
@@ -6,6 +7,7 @@ const ModalsProvider = () => {
     <>
       <FormRenameModal />
       <NewFormModal />
+      <NewFieldModal />
     </>
   );
 };

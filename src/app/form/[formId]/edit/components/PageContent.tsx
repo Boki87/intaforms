@@ -1,26 +1,31 @@
 import { addField } from "@/app/actions/fields";
+import NewFieldModal from "@/components/NewFieldModal";
 import TooltipWrapper from "@/components/TooltipWrapper";
 import { Button } from "@/components/ui/button";
 import useEditForm from "@/hooks/useEditForm";
+import useNewFieldModal from "@/hooks/useNewFieldModal";
 import { FaPlus } from "react-icons/fa";
 
 const PageContent: React.FC = () => {
+  const newFieldModal = useNewFieldModal();
   const { activePage: activePageId, pages } = useEditForm();
   const activePage = pages.find((page) => page.id === activePageId);
 
   const onAddFieldHandler = async () => {
-    console.log({
-      pageId: activePageId,
-      type: "input",
-      label: "Input Label",
-      placeholder: "Input Placeholder",
-    });
-    await addField({
-      pageId: activePageId,
-      type: "input",
-      label: "Input Label",
-      placeholder: "Input Placeholder",
-    });
+    console.log(11111);
+    newFieldModal.onOpen();
+    // console.log({
+    //   pageId: activePageId,
+    //   type: "input",
+    //   label: "Input Label",
+    //   placeholder: "Input Placeholder",
+    // });
+    // await addField({
+    //   pageId: activePageId,
+    //   type: "input",
+    //   label: "Input Label",
+    //   placeholder: "Input Placeholder",
+    // });
   };
 
   return (
