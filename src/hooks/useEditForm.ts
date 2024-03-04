@@ -8,6 +8,8 @@ interface FormEditState {
   activePage: number;
   setActivePage: (payload: number) => void;
   fields: TFormField[];
+  activeField: number | null;
+  setActiveField: (payload: number | null) => void;
 }
 
 const useEditForm = create<FormEditState>((set) => ({
@@ -16,6 +18,8 @@ const useEditForm = create<FormEditState>((set) => ({
   activePage: 0,
   setActivePage: (payload: number) => set({ activePage: payload }),
   fields: [],
+  activeField: null,
+  setActiveField: (payload: number | null) => set({ activeField: payload }),
 }));
 
 export default useEditForm;

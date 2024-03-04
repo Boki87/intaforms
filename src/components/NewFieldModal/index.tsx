@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,12 +20,11 @@ const NewFieldModal: React.FC = () => {
   const newFieldModal = useNewFieldModal();
 
   const onOpenChangeHandler = (isOpen: boolean) => {
-    console.log("open change", isOpen);
-    // if (isOpen) {
-    //   newFieldModal.onOpen();
-    // } else {
-    //   newFieldModal.onClose();
-    // }
+    if (isOpen) {
+      newFieldModal.onOpen();
+    } else {
+      newFieldModal.onClose();
+    }
   };
 
   return (

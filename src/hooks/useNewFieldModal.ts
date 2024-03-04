@@ -7,7 +7,7 @@ interface NewFieldModalState {
 }
 
 const useNewFieldModal = create<NewFieldModalState>((set) => ({
-  isOpen: true,
+  isOpen: false,
   onClose: () => set({ isOpen: false }),
   onOpen: () => set({ isOpen: true }),
 }));

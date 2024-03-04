@@ -13,6 +13,7 @@ export const formFields = pgTable("form_fields", {
   id: serial("id").primaryKey(),
   label: varchar("name", { length: 256 }).notNull(),
   placeholder: varchar("placeholder", { length: 256 }),
+  description: varchar("description", { length: 256 }),
   type: varchar("type", { length: 256 }).notNull(),
   isRequired: boolean("is_required").default(false).notNull(),
   orderIndex: integer("order_index").default(0).notNull(),

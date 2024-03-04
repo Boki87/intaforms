@@ -5,14 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounceEffect } from "@/hooks/useDebounceEffect";
 import useEditForm from "@/hooks/useEditForm";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const PageEditSidebar: React.FC = () => {
   const editForm = useEditForm();
-  const activePage = editForm.pages.find(
-    (page) => page.id === editForm.activePage,
-  );
+  const activePage = useMemo(() => {
+    return editForm.pages.find((page) => page.id === editForm.activePage);
+  }, [editForm.activePage, editForm.pages]);
+
   const [title, setTitle] = useState("");
+
+  const activeField = useMemo(() => {
+    return activePage?.fields?.find(
+      (field) => field.id === editForm.activeField,
+    );
+  }, [activePage, editForm.activeField]);
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -42,6 +49,10 @@ const PageEditSidebar: React.FC = () => {
     setTitle(activePage?.title || "");
   }, [activePage?.title]);
 
+  useEffect(() => {
+    editForm.setActiveField(null);
+  }, [editForm.activePage]);
+
   return (
     <div className="p-5">
       <div>
@@ -54,6 +65,15 @@ const PageEditSidebar: React.FC = () => {
           />
         </Label>
       </div>
+      <div>{JSON.stringify(editForm.activeField)}</div>
+      {activeField && (
+        <div>
+          <Label className="gap-2">
+            <span>Label</span>
+            <Input defaultValue={activeField?.label} placeholder="Label" />
+          </Label>
+        </div>
+      )}
     </div>
   );
 };
