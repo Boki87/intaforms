@@ -1,48 +1,64 @@
-import { addField } from "@/app/actions/fields";
-import NewFieldModal from "@/components/NewFieldModal";
+"use client";
+
+// import NewFieldModal from "@/components/NewFieldModal";
+import { useEffect } from "react";
 import TooltipWrapper from "@/components/TooltipWrapper";
 import { Button } from "@/components/ui/button";
 import useEditForm from "@/hooks/useEditForm";
 import useNewFieldModal from "@/hooks/useNewFieldModal";
 import { FaPlus } from "react-icons/fa";
-import FormField from "@/components/FormFields/FormField";
+import { FormFieldInstance, FormFields } from "@/components/FormFields/Field";
+import { idGenerator } from "../../../../../../utils";
 
 const PageContent: React.FC = () => {
   const newFieldModal = useNewFieldModal();
-  const { activePage: activePageId, pages, setActiveField } = useEditForm();
+  const {
+    activePage: activePageId,
+    pages,
+    setFields,
+    addField,
+    fields,
+    setActiveField,
+    activeField,
+  } = useEditForm();
   const activePage = pages.find((page) => page.id === activePageId);
 
   const onAddFieldHandler = async () => {
-    // console.log(11111);
-    // newFieldModal.onOpen();
-    // console.log({
-    //   pageId: activePageId,
-    //   type: "input",
-    //   label: "Input Label",
-    //   placeholder: "Input Placeholder",
-    // });
-    await addField({
-      pageId: activePageId,
-      type: "input",
-      label: "Input Label",
-      placeholder: "Input Placeholder",
-      description: "Description",
+    addField({
+      id: idGenerator(),
+      type: "Input",
+      orderIndex: 0,
+      extraProps: {
+        label: "First Name",
+        placeholder: "John",
+        description: "Enter your first name",
+        required: true,
+      },
     });
   };
 
+  useEffect(() => {
+    if (activePage) {
+      const fields = activePage.fields
+        ? (JSON.parse(activePage.fields) as FormFieldInstance[])
+        : [];
+      setFields(fields);
+    }
+  }, [activePage]);
+
   return (
     <div className="w-full h-full p-10 relative">
-      <div className="border border-gray-400 border-dashed rounded-lg w-full max-w-3xl mx-auto min-h-full bg-white p-10">
-        {activePage?.fields?.map((field) => {
-          const Field = FormField[field.type as keyof typeof FormField];
-          return Field ? (
-            <Field
-              onClick={() => setActiveField(field.id)}
+      <div className="border border-gray-400 border-dashed rounded-lg w-full max-w-3xl mx-auto min-h-full bg-white p-10 flex flex-col gap-3">
+        {fields.map((field) => {
+          const DesignComponent = FormFields[field.type].designComponent;
+          return (
+            <DesignComponent
+              onClick={() => setActiveField(field)}
+              isActive={field.id === activeField?.id}
+              fieldInstance={field}
               key={field.id}
-              mode="edit"
-              {...field}
             />
-          ) : null;
+          );
         })}
       </div>
       <TooltipWrapper message="Add a new field">

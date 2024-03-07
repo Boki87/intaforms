@@ -9,17 +9,13 @@ import { useEffect, useMemo, useState } from "react";
 
 const PageEditSidebar: React.FC = () => {
   const editForm = useEditForm();
+  const { activeField } = editForm;
+
   const activePage = useMemo(() => {
     return editForm.pages.find((page) => page.id === editForm.activePage);
   }, [editForm.activePage, editForm.pages]);
 
   const [title, setTitle] = useState("");
-
-  const activeField = useMemo(() => {
-    return activePage?.fields?.find(
-      (field) => field.id === editForm.activeField,
-    );
-  }, [activePage, editForm.activeField]);
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -49,13 +45,9 @@ const PageEditSidebar: React.FC = () => {
     setTitle(activePage?.title || "");
   }, [activePage?.title]);
 
-  useEffect(() => {
-    editForm.setActiveField(null);
-  }, [editForm.activePage]);
-
   return (
-    <div className="p-5">
-      <div>
+    <div>
+      <div className="p-5 border-b border-gray-200 bg-gray-100">
         <Label className="gap-2">
           <span>Page Title:</span>
           <Input
@@ -65,15 +57,7 @@ const PageEditSidebar: React.FC = () => {
           />
         </Label>
       </div>
-      <div>{JSON.stringify(editForm.activeField)}</div>
-      {activeField && (
-        <div>
-          <Label className="gap-2">
-            <span>Label</span>
-            <Input defaultValue={activeField?.label} placeholder="Label" />
-          </Label>
-        </div>
-      )}
+      <div>{JSON.stringify(activeField, null, 2)}</div>
     </div>
   );
 };

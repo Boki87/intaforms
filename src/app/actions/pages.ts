@@ -8,7 +8,6 @@ import { TPageInsert, pages } from "../../../db/schema/pages";
 export const fetchPages = async (userId: string, formId: number) => {
   try {
     const pagesData = await db.query.pages.findMany({
-      with: { fields: true },
       where: and(eq(pages.userId, userId), eq(pages.formId, formId)),
       orderBy: [asc(pages.createdAt), asc(pages.orderIndex)],
     });
