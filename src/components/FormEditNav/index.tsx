@@ -1,6 +1,6 @@
 "use client";
 
-import { FaArrowLeft, FaEye } from "react-icons/fa";
+import { FaArrowLeft, FaEye, FaSave } from "react-icons/fa";
 import Link from "next/link";
 import { Separator } from "../ui/separator";
 import useForm from "@/hooks/useForm";
@@ -68,8 +68,8 @@ const FormEditNav: React.FC = () => {
         </div>
         <div className="flex-1 flex justify-end">
           <Button className="gap-2">
-            <FaEye size={20} />
-            Publish
+            <FaSave size={20} />
+            Save
           </Button>
         </div>
       </div>

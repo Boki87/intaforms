@@ -27,7 +27,6 @@ const useEditForm = create<FormEditState>((set) => ({
   setActiveField: (payload: FormFieldInstance | null) =>
     set({ activeField: payload }),
   addField: (payload: FormFieldInstance) => {
-    console.log("Adding field", payload);
     set((state) => {
       return { fields: [...state.fields, payload] };
     });

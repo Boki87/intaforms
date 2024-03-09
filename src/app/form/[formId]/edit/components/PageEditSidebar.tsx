@@ -1,6 +1,7 @@
 "use client";
 
 import { updatePage } from "@/app/actions/pages";
+import { FormFields } from "@/components/FormFields/Field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounceEffect } from "@/hooks/useDebounceEffect";
@@ -21,6 +22,10 @@ const PageEditSidebar: React.FC = () => {
     setTitle(e.target.value);
   };
 
+  const FieldProperites = activeField
+    ? FormFields[activeField.type].propertiesComponent
+    : null;
+
   useDebounceEffect(
     async () => {
       if (!activePage) return;
@@ -37,7 +42,7 @@ const PageEditSidebar: React.FC = () => {
         }),
       );
     },
-    500,
+    1500,
     [title],
   );
 
@@ -57,7 +62,11 @@ const PageEditSidebar: React.FC = () => {
           />
         </Label>
       </div>
-      <div>{JSON.stringify(activeField, null, 2)}</div>
+      <div>
+        {activeField && FieldProperites && (
+          <FieldProperites fieldInstance={activeField} />
+        )}
+      </div>
     </div>
   );
 };

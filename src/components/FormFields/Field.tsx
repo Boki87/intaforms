@@ -13,7 +13,6 @@ export type FormField = {
 
   formComponent: React.FC<{
     fieldInstance: FormFieldInstance;
-    submitValue: (value: any) => void;
   }>;
 
   propertiesComponent: React.FC<{
