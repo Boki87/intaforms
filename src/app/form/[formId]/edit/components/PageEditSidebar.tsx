@@ -6,15 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDebounceEffect } from "@/hooks/useDebounceEffect";
 import useEditForm from "@/hooks/useEditForm";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const PageEditSidebar: React.FC = () => {
   const editForm = useEditForm();
-  const { activeField } = editForm;
+  const { activeField, setActiveField } = editForm;
 
-  const activePage = useMemo(() => {
-    return editForm.pages.find((page) => page.id === editForm.activePage);
-  }, [editForm.activePage, editForm.pages]);
+  const activePage = editForm.pages.find(
+    (page) => page.id === editForm.activePage,
+  );
+
+  const previousActivePage = useRef(activePage);
 
   const [title, setTitle] = useState("");
 
@@ -49,6 +51,10 @@ const PageEditSidebar: React.FC = () => {
   useEffect(() => {
     setTitle(activePage?.title || "");
   }, [activePage?.title]);
+
+  useEffect(() => {
+    setActiveField(null);
+  }, [activePage?.id]);
 
   return (
     <div>

@@ -11,7 +11,13 @@ export default async function FormEditLayout({
   children,
   params,
 }: PropsWithChildren<{ params: { formId: string } }>) {
-  const user = await currentUser();
+  let user;
+  try {
+    user = await currentUser();
+  } catch (e) {
+    console.error(e);
+    redirect("/");
+  }
   if (!user) redirect("/");
 
   const formData = await db.query.forms.findFirst({

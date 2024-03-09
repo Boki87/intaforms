@@ -15,6 +15,7 @@ const FormEditProvider: React.FC<PropsWithChildren<Props>> = ({
   const editForm = useEditForm();
 
   useEffect(() => {
+    if (pages.length === 0) return;
     editForm.setPages(pages);
     editForm.setActivePage(pages[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps

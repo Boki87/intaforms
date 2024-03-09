@@ -21,6 +21,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { useDebounceEffect } from "@/hooks/useDebounceEffect";
+import { updatePage } from "@/app/actions/pages";
 
 const type: FieldsType = "Input";
 
@@ -97,11 +99,11 @@ function ProperitesComponent({
   fieldInstance: FormFieldInstance;
 }) {
   const element = fieldInstance as CustomFormFieldInstance;
-  const { updateField } = useEditForm();
+  const { updateField, fields, activePage } = useEditForm();
 
   const form = useForm<propertiesFormSchemaType>({
     resolver: zodResolver(properitesSchema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       label: element.extraProps.label,
       description: element.extraProps.description,
@@ -111,7 +113,6 @@ function ProperitesComponent({
   });
 
   function applyChanges(values: propertiesFormSchemaType) {
-    console.log(1111, values);
     updateField(element.id, {
       ...element,
       extraProps: values,
@@ -122,108 +123,131 @@ function ProperitesComponent({
     form.reset(element.extraProps);
   }, [element]);
 
+  useDebounceEffect(
+    async () => {
+      const newFields = fields.map((f) => {
+        if (f.id === element.id) {
+          return {
+            ...f,
+            extraProps: form.getValues(),
+          };
+        }
+        return f;
+      });
+      await updatePage(activePage, {
+        fields: JSON.stringify(newFields),
+      });
+    },
+    1000,
+    [form.watch()],
+  );
+
   return (
     <div className="p-5">
       <Form {...form}>
         <form
-          onBlur={form.handleSubmit(applyChanges)}
+          onChange={form.handleSubmit(applyChanges)}
           onSubmit={(e) => {
             e.preventDefault();
           }}
         >
-          <FormField
-            control={form.control}
-            name="label"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Label</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.currentTarget.blur();
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormDescription>
-                  The label of the field. <br /> It will be displayed above the
-                  field
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.currentTarget.blur();
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormDescription>
-                  The description of the field. <br /> It will be displayed
-                  below the label
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="label"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Label</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    The label of the field. <br /> It will be displayed above
+                    the field
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    The description of the field. <br /> It will be displayed
+                    below the label
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="placeholder"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Placeholder</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.currentTarget.blur();
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormDescription>
-                  The placeholder of the field. <br /> It will be displayed
-                  inside the input
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Placeholder</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    The placeholder of the field. <br /> It will be displayed
+                    inside the input
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="required"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Is Required</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Is this field required to be filled out?
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="required"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-3">
+                    <FormLabel>Is Required</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </div>
+                  <FormDescription>
+                    Is this field required to be filled out?
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </form>
       </Form>
     </div>

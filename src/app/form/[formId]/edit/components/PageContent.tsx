@@ -9,9 +9,10 @@ import useNewFieldModal from "@/hooks/useNewFieldModal";
 import { FaPlus } from "react-icons/fa";
 import { FormFieldInstance, FormFields } from "@/components/FormFields/Field";
 import { idGenerator } from "../../../../../../utils";
+import { updatePage } from "@/app/actions/pages";
 
 const PageContent: React.FC = () => {
-  const newFieldModal = useNewFieldModal();
+  // const newFieldModal = useNewFieldModal();
   const {
     activePage: activePageId,
     pages,
@@ -20,11 +21,13 @@ const PageContent: React.FC = () => {
     fields,
     setActiveField,
     activeField,
+    setPages,
   } = useEditForm();
+
   const activePage = pages.find((page) => page.id === activePageId);
 
   const onAddFieldHandler = async () => {
-    addField({
+    const newField = {
       id: idGenerator(),
       type: "Input",
       orderIndex: 0,
@@ -34,15 +37,19 @@ const PageContent: React.FC = () => {
         description: "Enter your first name",
         required: true,
       },
-    });
+    };
+
+    addField(newField as FormFieldInstance);
+    await updatePage(activePageId, { fields: JSON.stringify(fields) });
   };
 
   useEffect(() => {
     if (activePage) {
-      const fields = activePage.fields
+      console.log({ activePage });
+      const fieldsRes = activePage.fields
         ? (JSON.parse(activePage.fields) as FormFieldInstance[])
         : [];
-      setFields(fields);
+      setFields(fieldsRes);
     }
   }, [activePage]);
 
