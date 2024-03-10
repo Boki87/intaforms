@@ -11,7 +11,7 @@ interface FormEditState {
   setFields: (payload: FormFieldInstance[]) => void;
   activeField: FormFieldInstance | null;
   setActiveField: (payload: FormFieldInstance | null) => void;
-  addField: (payload: FormFieldInstance) => void;
+  addField: (pageId: number, payload: FormFieldInstance) => void;
   updateField: (id: string, payload: FormFieldInstance) => void;
   removeField: (id: string) => void;
 }
@@ -26,9 +26,16 @@ const useEditForm = create<FormEditState>((set) => ({
   activeField: null,
   setActiveField: (payload: FormFieldInstance | null) =>
     set({ activeField: payload }),
-  addField: (payload: FormFieldInstance) => {
+  addField: (pageId: number, payload: FormFieldInstance) => {
     set((state) => {
-      return { fields: [...state.fields, payload] };
+      const newFields = [...state.fields, payload];
+      const newPages = [...useEditForm.getState().pages];
+      newPages.forEach((page) => {
+        if (page.id === pageId) {
+          page.fields = JSON.stringify(newFields);
+        }
+      });
+      return { fields: newFields, pages: newPages };
     });
   },
   updateField: (id: string, payload: FormFieldInstance) => {

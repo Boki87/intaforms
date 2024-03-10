@@ -134,6 +134,7 @@ function ProperitesComponent({
         }
         return f;
       });
+      console.log("update page in db", newFields);
       await updatePage(activePage, {
         fields: JSON.stringify(newFields),
       });

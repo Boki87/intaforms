@@ -19,6 +19,8 @@ export default async function EditFormPage({
   const form = await fetchFormByUuid(formId);
   if (!form) redirect("/dashboard");
 
+  if (form.userId !== user.id) redirect("/dashboard");
+
   const pages = await fetchPages(user.id, form?.id);
 
   return (

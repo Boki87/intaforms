@@ -1,7 +1,7 @@
 "use client";
 
 // import NewFieldModal from "@/components/NewFieldModal";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import TooltipWrapper from "@/components/TooltipWrapper";
 import { Button } from "@/components/ui/button";
 import useEditForm from "@/hooks/useEditForm";
@@ -39,8 +39,7 @@ const PageContent: React.FC = () => {
       },
     };
 
-    addField(newField as FormFieldInstance);
-    await updatePage(activePageId, { fields: JSON.stringify(fields) });
+    addField(activePageId, newField as FormFieldInstance);
   };
 
   useEffect(() => {
@@ -52,6 +51,14 @@ const PageContent: React.FC = () => {
       setFields(fieldsRes);
     }
   }, [activePage]);
+
+  useEffect(() => {
+    console.log("fields changed", { fields });
+    const updatePagesReq = async () => {
+      await updatePage(activePageId, { fields: JSON.stringify(fields) });
+    };
+    updatePagesReq();
+  }, [fields]);
 
   return (
     <div className="w-full h-full p-10 relative">

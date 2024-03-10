@@ -1,7 +1,7 @@
 "use client";
 
 import { PropsWithChildren, useEffect } from "react";
-import { TForm, TPage } from "../../db/schema";
+import { TPage } from "../../db/schema";
 import useEditForm from "@/hooks/useEditForm";
 
 type Props = {
