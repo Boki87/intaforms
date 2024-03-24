@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import useEditForm from "@/hooks/useEditForm";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -23,6 +23,9 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useDebounceEffect } from "@/hooks/useDebounceEffect";
 import { updatePage } from "@/app/actions/pages";
+import { MdDragIndicator } from "react-icons/md";
+import { Button } from "@/components/ui/button";
+import { FaTrash } from "react-icons/fa";
 
 const type: FieldsType = "Input";
 
@@ -43,8 +46,17 @@ const properitesSchema = z.object({
 export const InputFieldElement: TFormField = {
   type,
   designComponent: DesignComponent,
-  formComponent: formComponent,
+  formComponent: FormComponent,
   propertiesComponent: ProperitesComponent,
+  validate: (formField: FormFieldInstance, currentVal: string): boolean => {
+    const element = formField as CustomFormFieldInstance;
+    if (element.extraProps.required) {
+      // if required check if length is greater than 0
+      return currentVal?.length > 0;
+    }
+    // if not required, return true for any value
+    return true;
+  },
 };
 
 type CustomFormFieldInstance = FormFieldInstance & {
@@ -54,10 +66,12 @@ type CustomFormFieldInstance = FormFieldInstance & {
 function DesignComponent({
   fieldInstance,
   onClick,
+  onDelete,
   isActive,
 }: {
   fieldInstance: FormFieldInstance;
   onClick?: () => void;
+  onDelete?: () => void;
   isActive?: boolean;
 }) {
   const element = fieldInstance as CustomFormFieldInstance;
@@ -68,28 +82,89 @@ function DesignComponent({
     <div
       onClick={onClick}
       className={cn(
-        "p-5 rounded-lg hover:bg-gray-50 cursor-pointer",
+        "p-5 rounded-lg hover:bg-gray-50 cursor-pointer flex gap-2",
         isActive ? "bg-gray-50 ring-2 ring-black ring-offset-2" : null,
       )}
     >
-      <Label>
-        {label} {required && "*"}
-      </Label>
-      {description && <p className="text-sm text-gray-500">{description}</p>}
-      <Input readOnly disabled placeholder={placeholder} />
+      <div>
+        <div className="p-2">
+          <MdDragIndicator />
+        </div>
+      </div>
+      <div className="flex-grow relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute -top-3 right-0 text-gray-600"
+          onClick={onDelete}
+        >
+          <FaTrash />
+        </Button>
+
+        <Label>
+          {label} {required && "*"}
+        </Label>
+        {description && <p className="text-sm text-gray-500">{description}</p>}
+        <Input readOnly disabled placeholder={placeholder} />
+      </div>
     </div>
   );
 }
 
-function formComponent({
+function FormComponent({
   fieldInstance,
+  submitValue,
+  isInvalid,
+  defaultValue,
 }: {
   fieldInstance: FormFieldInstance;
+  submitValue?: (key: string, value: string) => void;
+  isInvalid?: boolean;
+  defaultValue?: string;
 }) {
   const element = fieldInstance as CustomFormFieldInstance;
   const { label, description, required, placeholder } = element.extraProps;
 
-  return <div>{label && <Label>{label}</Label>}</div>;
+  const [value, setValue] = useState(defaultValue || "");
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setError(isInvalid === true);
+  }, [isInvalid]);
+
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <Label className={cn(error && "text-red-500")}>
+        {label}
+        {required && "*"}
+      </Label>
+      <Input
+        className={cn(error && "border-red-500")}
+        placeholder={placeholder}
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
+        onBlur={(e) => {
+          if (!submitValue) return;
+          const valid = InputFieldElement.validate(element, e.target.value);
+          setError(!valid);
+          // if (!valid) return;
+          submitValue(element.id, e.target.value);
+        }}
+        value={value}
+      />
+      {description && (
+        <p
+          className={cn(
+            "text-muted-foreground text-[0.8rem]",
+            error && "text-red-500",
+          )}
+        >
+          {description}
+        </p>
+      )}
+    </div>
+  );
 }
 
 type propertiesFormSchemaType = z.infer<typeof properitesSchema>;
@@ -100,6 +175,8 @@ function ProperitesComponent({
 }) {
   const element = fieldInstance as CustomFormFieldInstance;
   const { updateField, fields, activePage } = useEditForm();
+
+  const [trackedProps, setTrackedProps] = useState({ ...element.extraProps });
 
   const form = useForm<propertiesFormSchemaType>({
     resolver: zodResolver(properitesSchema),
@@ -117,6 +194,8 @@ function ProperitesComponent({
       ...element,
       extraProps: values,
     });
+
+    setTrackedProps(values);
   }
 
   useEffect(() => {
@@ -129,18 +208,18 @@ function ProperitesComponent({
         if (f.id === element.id) {
           return {
             ...f,
-            extraProps: form.getValues(),
+            extraProps: trackedProps,
           };
         }
         return f;
       });
-      console.log("update page in db", newFields);
       await updatePage(activePage, {
         fields: JSON.stringify(newFields),
       });
     },
     1000,
-    [form.watch()],
+
+    [trackedProps],
   );
 
   return (

@@ -52,6 +52,9 @@ export const renameForm = async (id: number, name: string) => {
 };
 
 export const fetchFormByUuid = async (uuid: string) => {
-  const form = await db.query.forms.findFirst({ where: eq(forms.uuid, uuid) });
+  const form = await db.query.forms.findFirst({
+    where: eq(forms.uuid, uuid),
+    with: { pages: true },
+  });
   return form;
 };

@@ -11,7 +11,7 @@ interface FormEditState {
   setFields: (payload: FormFieldInstance[]) => void;
   activeField: FormFieldInstance | null;
   setActiveField: (payload: FormFieldInstance | null) => void;
-  addField: (pageId: number, payload: FormFieldInstance) => void;
+  addField: (payload: FormFieldInstance) => void;
   updateField: (id: string, payload: FormFieldInstance) => void;
   removeField: (id: string) => void;
 }
@@ -26,12 +26,12 @@ const useEditForm = create<FormEditState>((set) => ({
   activeField: null,
   setActiveField: (payload: FormFieldInstance | null) =>
     set({ activeField: payload }),
-  addField: (pageId: number, payload: FormFieldInstance) => {
+  addField: (payload: FormFieldInstance) => {
     set((state) => {
       const newFields = [...state.fields, payload];
       const newPages = [...useEditForm.getState().pages];
       newPages.forEach((page) => {
-        if (page.id === pageId) {
+        if (page.id === state.activePage) {
           page.fields = JSON.stringify(newFields);
         }
       });
@@ -40,19 +40,33 @@ const useEditForm = create<FormEditState>((set) => ({
   },
   updateField: (id: string, payload: FormFieldInstance) => {
     set((state) => {
-      const fields = state.fields.map((field) => {
+      const newFields = state.fields.map((field) => {
         if (field.id === id) {
           return payload;
         }
         return field;
       });
-      return { fields };
+
+      const newPages = [...useEditForm.getState().pages];
+      newPages.forEach((page) => {
+        if (page.id === state.activePage) {
+          page.fields = JSON.stringify(newFields);
+        }
+      });
+
+      return { fields: newFields };
     });
   },
   removeField: (id: string) => {
     set((state) => {
-      const fields = state.fields.filter((field) => field.id !== id);
-      return { fields };
+      const newFields = state.fields.filter((field) => field.id !== id);
+      const newPages = [...useEditForm.getState().pages];
+      newPages.forEach((page) => {
+        if (page.id === state.activePage) {
+          page.fields = JSON.stringify(newFields);
+        }
+      });
+      return { fields: newFields, pages: newPages };
     });
   },
 }));

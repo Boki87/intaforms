@@ -11,6 +11,7 @@ import {
 import { generatePublicId } from "../../utils";
 import { users } from "./users";
 import { pages } from "./pages";
+import { formSubmissions } from "./formSubmissions";
 
 export const forms = pgTable("forms", {
   id: serial("id").primaryKey(),
@@ -22,6 +23,7 @@ export const forms = pgTable("forms", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   isInternal: boolean("is_internal").notNull().default(true),
+  isPublished: boolean("is_published").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -31,10 +33,14 @@ export const formsRelations = relations(forms, ({ one, many }) => ({
     references: [users.id],
   }),
   pages: many(pages),
+  formSubmissions: many(formSubmissions),
 }));
 
 export type TForm = typeof forms.$inferSelect;
 export type TFormInsert = typeof forms.$inferInsert;
 export type TFormWithPages = typeof forms.$inferSelect & {
   pages: (typeof pages.$inferSelect)[];
+};
+export type TFormWithSubmissions = typeof forms.$inferSelect & {
+  formSubmissions: (typeof pages.$inferSelect)[];
 };

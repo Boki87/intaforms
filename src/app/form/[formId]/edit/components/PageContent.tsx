@@ -1,7 +1,7 @@
 "use client";
 
 // import NewFieldModal from "@/components/NewFieldModal";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TooltipWrapper from "@/components/TooltipWrapper";
 import { Button } from "@/components/ui/button";
 import useEditForm from "@/hooks/useEditForm";
@@ -10,14 +10,20 @@ import { FaPlus } from "react-icons/fa";
 import { FormFieldInstance, FormFields } from "@/components/FormFields/Field";
 import { idGenerator } from "../../../../../../utils";
 import { updatePage } from "@/app/actions/pages";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const PageContent: React.FC = () => {
   // const newFieldModal = useNewFieldModal();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [fieldToDelete, setFieldToDelete] = useState<string | null>(null);
+
+  const prevFields = useRef<FormFieldInstance[]>([]);
   const {
     activePage: activePageId,
     pages,
     setFields,
     addField,
+    removeField,
     fields,
     setActiveField,
     activeField,
@@ -39,12 +45,24 @@ const PageContent: React.FC = () => {
       },
     };
 
-    addField(activePageId, newField as FormFieldInstance);
+    addField(newField as FormFieldInstance);
+  };
+
+  const onDelteFieldHandler = (id: string) => {
+    setFieldToDelete(id);
+    setShowConfirm(true);
+  };
+
+  const deleteField = async () => {
+    if (!fieldToDelete) return;
+    removeField(fieldToDelete);
+    setActiveField(null);
+    setFieldToDelete(null);
+    setShowConfirm(false);
   };
 
   useEffect(() => {
     if (activePage) {
-      console.log({ activePage });
       const fieldsRes = activePage.fields
         ? (JSON.parse(activePage.fields) as FormFieldInstance[])
         : [];
@@ -53,11 +71,14 @@ const PageContent: React.FC = () => {
   }, [activePage]);
 
   useEffect(() => {
-    console.log("fields changed", { fields });
-    const updatePagesReq = async () => {
-      await updatePage(activePageId, { fields: JSON.stringify(fields) });
-    };
-    updatePagesReq();
+    if (fields.length === 0) return;
+    if (prevFields.current.length !== fields.length) {
+      // console.log("field added or removed, update db");
+      updatePage(activePageId, {
+        fields: JSON.stringify(fields),
+      });
+      prevFields.current = [...fields];
+    }
   }, [fields]);
 
   return (
@@ -68,6 +89,7 @@ const PageContent: React.FC = () => {
           return (
             <DesignComponent
               onClick={() => setActiveField(field)}
+              onDelete={() => onDelteFieldHandler(field.id)}
               isActive={field.id === activeField?.id}
               fieldInstance={field}
               key={field.id}
@@ -84,6 +106,15 @@ const PageContent: React.FC = () => {
           <FaPlus />
         </Button>
       </TooltipWrapper>
+
+      <ConfirmDialog
+        message="Are you sure you want to delete this field?"
+        isOpen={showConfirm}
+        onConfirm={deleteField}
+        onCancel={() => {
+          setShowConfirm(false);
+        }}
+      />
     </div>
   );
 };
